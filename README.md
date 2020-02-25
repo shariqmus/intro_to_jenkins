@@ -1,3 +1,7 @@
+# Introduction to Jenkins
+
+This repository holds the details of actions needed to be performed while doing the L3 'An Introduction to Jenkins' by Shariq Mustaquim - sharimus@
+
 ## Install Jenkins
 
 1. Change region to Sydney (ap-southeast-2)
