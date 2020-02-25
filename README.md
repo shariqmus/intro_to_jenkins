@@ -1,29 +1,26 @@
-# Introduction to Jenkins
-
-This repository holds the details of actions needed to be performed while doing the L3 'An Introduction to Jenkins' by Shariq Mustaquim - sharimus@
-
 ## Install Jenkins
 
 1. Change region to Sydney (ap-southeast-2)
-2. Create a KeyPair
+2. Create a KeyPair and save the private '.pem' key in a local directory
 3. Clone my GitHub repo: <TODO>
 4. Run the following Command to create the stack:
    
          aws cloudformation create-stack --region ap-southeast-2 --capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM --template-body file://template.yml  --stack-name introToJenkins --parameters ParameterKey=KeyName,ParameterValue=<key_name>
-5. Run the following command to find the public ip
+5. Wait for the stack to complete provisioning resources
+6. Run the following command to find the endpoint URL of Jenkins server
 
          aws cloudformation describe-stacks --region ap-southeast-2 --query "Stacks[*].Outputs[?OutputKey=='JenkinsMasterURL'].OutputValue" --output text
-6. Navigate to Public IP
-7. Run the following command to find the SSH command to connect to the server:
+7. Navigate to the URL in browser
+8. Run the following command to find the SSH command to connect to the server:
 
          aws cloudformation describe-stacks --region ap-southeast-2 --query "Stacks[*].Outputs[?OutputKey=='JenkinsMasterSSH'].OutputValue" --output text
 
-8. 'cd' to directory where you save the private 'pem' key and run the command from the above step to SSH into the EC2 instance. 
-9. Find the password in the EC2 instance:
+9. Run the above command in terminal to SSH into the Jenkins master Linux EC2 instance 
+10. 'cd' to directory where you save the private 'pem' key and run the command from the above step to SSH into the EC2 instance. 
+11. Find the password in the EC2 instance:
    $ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-10. Add the password to Jenkins UI and click continue
-11. Accept default plugins <TODO>
-
+11. Add the password to Jenkins UI and click continue
+12. Accept default plugins
 
 ## Set up Credential for the Build Agent
 
