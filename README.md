@@ -1,6 +1,6 @@
 # Introduction to Jenkins
 
-This repository holds the details of actions needed to be performed for the Live Learning Lab (L3) "An Introduction to Jenkins" by Shariq Mustaquim - sharimus@
+This repository holds the details of actions needed to be performed for the Live Learning Lab (L3) "An Introduction to Jenkins" by Shariq Mustaquim - sharmus@
 
 ## Install Jenkins
 
