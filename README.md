@@ -26,7 +26,7 @@ This repository holds the details of actions needed to be performed for the Live
          sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 12.  Add the password to Jenkins UI and click continue
 13.  Accept default plugins
-14.  Create an admin user and `make sure to remember the username and password`
+14.  Create an admin user and **`make sure to remember the username and password`**
 15.  Click 'Save and Continue', 'Save and Finish' and 'Start using Jenkins' button.
 
 ## Set up Credential for the Build Agent
