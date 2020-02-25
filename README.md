@@ -8,6 +8,8 @@ This repository holds the details of actions needed to be performed for the Live
 2. Change region to Sydney (ap-southeast-2)
 3. Create a KeyPair and save the private '.pem' key in a local directory
 4. Clone this GitHub repo
+
+         git clone https://github.com/shariqmus/intro_to_jenkins.git
 5. Change directory to cloned folder
 
          cd intro_to_jenkins
