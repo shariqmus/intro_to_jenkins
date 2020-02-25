@@ -22,9 +22,10 @@ This repository holds the details of actions needed to be performed while doing 
 9. Run the above command in terminal to SSH into the Jenkins master Linux EC2 instance 
 10. 'cd' to directory where you save the private 'pem' key and run the command from the above step to SSH into the EC2 instance. 
 11. Find the password in the EC2 instance:
-   $ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-11. Add the password to Jenkins UI and click continue
-12. Accept default plugins
+    
+         sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+1.  Add the password to Jenkins UI and click continue
+2.  Accept default plugins
 
 ## Set up Credential for the Build Agent
 
@@ -34,7 +35,7 @@ This repository holds the details of actions needed to be performed while doing 
 
    - Username: **ec2-user**
    - Private Key: **Enter directly**
-   - Key: Copy/Paste the **Private key** created in 'Install Jenkins' Step #2.
+   - Key: Copy/Paste the **Private key** (.pem file) created in 'Install Jenkins' Step #2.
 
 ## Connect Jenkins Master to the Build Agent
 
@@ -119,10 +120,13 @@ _(Optional: Confirm Jenkins created a Personal Access Token in GitHub)_
 
          # Initialize beanstalk application
          eb init my-eb-app --platform python-3.6 --region ap-southeast-2
+
          # Use environment named 'DevelopmentEnvironment'
          eb use DevelopmentEnvironment
+         
          # deploy new version
          eb deploy
+         
          # report on deployment status
          eb health
          eb status
