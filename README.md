@@ -6,7 +6,7 @@ This repository holds the details of actions needed to be performed for the Live
 
 1. Change region to Sydney (ap-southeast-2)
 2. Create a KeyPair and save the private '.pem' key in a local directory
-3. Clone my GitHub repo: <TODO>
+3. Clone this GitHub repo
 4. Run the following Command to create the stack:
    
          aws cloudformation create-stack --region ap-southeast-2 --capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM --template-body file://template.yml  --stack-name introToJenkins --parameters ParameterKey=KeyName,ParameterValue=<key_name>
@@ -24,8 +24,10 @@ This repository holds the details of actions needed to be performed for the Live
 11. Find the password in the EC2 instance:
     
          sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-1.  Add the password to Jenkins UI and click continue
-2.  Accept default plugins
+12.  Add the password to Jenkins UI and click continue
+13.  Accept default plugins
+14.  Create an admin user and `make sure to remember the username and password`
+15.  Click 'Save and Continue', 'Save and Finish' and 'Start using Jenkins' button.
 
 ## Set up Credential for the Build Agent
 
