@@ -1,0 +1,283 @@
+Description: >-
+  Tempalate for course 'An Introduction to Jenkins Automation Server by Shariq Mustaquim (sharmus@)'
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  KeyName: 
+    Type: AWS::EC2::KeyPair::KeyName
+
+Resources:
+
+# VPC ===============================================================
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.38.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+        VpcId: !Ref VPC
+        InternetGatewayId: !Ref InternetGateway
+
+  SubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 172.38.0.0/20
+      MapPublicIpOnLaunch: true
+
+  SubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 172.38.16.0/20
+      MapPublicIpOnLaunch: true
+
+  SubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 172.38.32.0/20
+      MapPublicIpOnLaunch: true
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+  InternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref RouteTable
+
+  SubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetA
+
+  SubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetB
+
+  SubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetC
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "Internet Group"
+      GroupDescription: "SSH traffic in, all traffic out."
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+# Jenkins Master ===============================================================
+
+  JenkinsMaster:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0f767afb799f45102
+      KeyName: !Ref KeyName
+      InstanceType: t2.medium
+      Tags:
+        - Key: Name
+          Value: Jenkins Master
+        - Key: auto-delete
+          Value: never
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: JenkinsMasterSecurityGroup
+          SubnetId: 
+            Ref: SubnetA
+      UserData:
+        Fn::Base64: !Sub |
+            #!/bin/bash
+            yum remove java-1.7.0-openjdk -y
+            yum install java-1.8.0 -y
+            yum update –y
+            wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+            rpm -import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key
+            yum install jenkins -y
+            systemctl start jenkins.service
+            systemctl enable jenkins.service
+            amazon-linux-extras install nginx1.12 -y
+            systemctl stop nginx.service
+            mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+            wget -P /etc/nginx https://raw.githubusercontent.com/shariqmus/intro_to_jenkins/master/nginx.conf
+            wget -P /etc/nginx/conf.d https://raw.githubusercontent.com/shariqmus/intro_to_jenkins/master/jenkins.conf
+            systemctl start nginx.service
+
+  JenkinsMasterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow connecting via HTTP and SSH
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+
+# Jenkins Build Agent ===============================================================
+
+  JenkinsBuildAgentInstanceProfileRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "ec2.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AWSElasticBeanstalkFullAccess"
+      RoleName: "intro-to-jenkins-beanstalk-role"
+
+  JenkinsBuildAgentInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Roles:
+        - !Ref 'JenkinsBuildAgentInstanceProfileRole'
+      InstanceProfileName: "intro-to-jenkins-beanstalk-role"
+
+  JenkinsBuildAgent:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0f767afb799f45102
+      KeyName: !Ref KeyName
+      InstanceType: t2.medium
+      Tags:
+        - Key: Name
+          Value: Jenkins Build Agent
+        - Key: auto-delete
+          Value: never
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: JenkinsBuildAgentSecurityGroup
+          SubnetId: 
+            Ref: SubnetA
+      IamInstanceProfile: !Ref JenkinsBuildAgentInstanceProfile
+      UserData:
+        Fn::Base64: !Sub |
+            #!/bin/bash
+            yum update –y
+            yum install java-1.8.0-openjdk -y
+            yum install git -y
+            yum groupinstall "Development Tools" -y 
+            yum install -y zlib-devel openssl-devel ncurses-devel libffi-devel sqlite-devel.x86_64 readline-devel.x86_64 bzip2-devel.x86_64
+            yum install -y python37
+            curl -O https://bootstrap.pypa.io/get-pip.py
+            python3 get-pip.py --user
+            yum remove -y python-cffi -y
+            ~/.local/bin/pip install cffi>=1.8.0
+            /usr/bin/easy_install awsebcli
+
+  JenkinsBuildAgentSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow connecting via SSH
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+
+# Elastic Beanstalk environment ===============================================================
+
+  EBApplication:
+    Type: AWS::ElasticBeanstalk::Application
+    Properties:
+      ApplicationName: my-eb-app
+      ApplicationVersions:
+        - Description: Version 1.0
+          SourceBundle:
+            S3Bucket: !Join 
+              - ''
+              - - elasticbeanstalk-samples-
+                - !Ref 'AWS::Region'
+            S3Key: python-sample-20150402.zip
+          VersionLabel: Initial Version
+      Description: AWS Elastic Beanstalk Python Sample Application
+    
+  EBEnvironment:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties: 
+      EnvironmentName: DevelopmentEnvironment
+      ApplicationName: !Ref EBApplication
+      Description: "AWS Elastic Beanstalk Environment running Python Sample Application"
+      SolutionStackName: "64bit Amazon Linux 2018.03 v2.9.5 running Python 3.6"
+      OptionSettings: 
+        - 
+          Namespace: "aws:autoscaling:launchconfiguration"
+          OptionName: EC2KeyName
+          Value: !Ref KeyName
+      VersionLabel: "Initial Version"
+
+# Outputs ===============================================================
+
+Outputs:
+
+  JenkinsMasterURL:
+    Description: The URL of Jenkins Master
+    Value: !Join [ "", [ "http://", !GetAtt JenkinsMaster.PublicDnsName ] ]
+
+  JenkinsGitHubWebHookURL:
+    Description: The URL to Push GitHub Webhook event to Jenkins Master
+    Value: !Join [ "", [ "http://", !GetAtt JenkinsMaster.PublicDnsName, "/github-webhook/" ] ]
+
+  JenkinsMasterSSH:
+    Description: SSH Connection command for Jenkins Master
+    Value: !Join [ "", [ "ssh -i ", !Ref KeyName, ".pem ec2-user@", !GetAtt JenkinsMaster.PublicDnsName ] ] 
+
+  JenkinsBuildAgentPrivateDnsName:
+    Description: Private DNS Name for Jenkins Build Agent
+    Value: !Join [ "", [ !GetAtt JenkinsBuildAgent.PrivateDnsName ] ] 
+  
+  JenkinsBuildAgentSSH:
+    Description: SSH Connection command for Jenkins Build Agent
+    Value: !Join [ "", [ "ssh -i ", !Ref KeyName, ".pem ec2-user@", !GetAtt JenkinsBuildAgent.PublicDnsName ] ] 
+  
+  EBEnvironmentURL:
+    Description: The URL of Elastic Beanstalk Environment
+    Value: !Join [ "", [ "http://", !GetAtt EBEnvironment.EndpointURL ] ]
