@@ -4,30 +4,31 @@ This repository holds the details of actions needed to be performed for the Live
 
 ## Install Jenkins
 
-1. Change region to Sydney (ap-southeast-2)
-2. Create a KeyPair and save the private '.pem' key in a local directory
-3. Clone this GitHub repo
-4. Run the following Command to create the stack (**Update the <key_name> parameter**):
+1. Login to AWS Console
+2. Change region to Sydney (ap-southeast-2)
+3. Create a KeyPair and save the private '.pem' key in a local directory
+4. Clone this GitHub repo
+5. Run the following Command to create the stack (**Update the <key_name> parameter**):
    
          aws cloudformation create-stack --region ap-southeast-2 --capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM --template-body file://template.yml  --stack-name introToJenkins --parameters ParameterKey=KeyName,ParameterValue=<key_name>
-5. Wait for the stack to complete provisioning resources
-6. Run the following command to find the endpoint URL of Jenkins server
+6. Wait for the stack to complete provisioning resources
+7. Run the following command to find the endpoint URL of Jenkins server
 
          aws cloudformation describe-stacks --region ap-southeast-2 --query "Stacks[*].Outputs[?OutputKey=='JenkinsMasterURL'].OutputValue" --output text
-7. Navigate to the URL in browser
-8. Run the following command to find the SSH command to connect to the server:
+8. Navigate to the URL in browser
+9. Run the following command to find the SSH command to connect to the server:
 
          aws cloudformation describe-stacks --region ap-southeast-2 --query "Stacks[*].Outputs[?OutputKey=='JenkinsMasterSSH'].OutputValue" --output text
 
-9. Run the above command in terminal to SSH into the Jenkins master Linux EC2 instance 
-10. 'cd' to directory where you save the private 'pem' key and run the command from the above step to SSH into the EC2 instance. 
-11. Find the password in the EC2 instance:
+10. Run the above command in terminal to SSH into the Jenkins master Linux EC2 instance 
+11. 'cd' to directory where you save the private 'pem' key and run the command from the above step to SSH into the EC2 instance. 
+12. Find the password in the EC2 instance:
     
          sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-12.  Add the password to Jenkins UI and click continue
-13.  Accept default plugins
-14.  Create an admin user and **`make sure to remember the username and password`**
-15.  Click 'Save and Continue', 'Save and Finish' and 'Start using Jenkins' button.
+13.  Add the password to Jenkins UI and click continue
+14.  Accept default plugins
+15.  Create an admin user and **`make sure to remember the username and password`**
+16.  Click 'Save and Continue', 'Save and Finish' and 'Start using Jenkins' button.
 
 ## Set up Credential for the Build Agent
 
