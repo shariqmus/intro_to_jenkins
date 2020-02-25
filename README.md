@@ -7,7 +7,7 @@ This repository holds the details of actions needed to be performed for the Live
 1. Change region to Sydney (ap-southeast-2)
 2. Create a KeyPair and save the private '.pem' key in a local directory
 3. Clone this GitHub repo
-4. Run the following Command to create the stack:
+4. Run the following Command to create the stack (**Update the <key_name> parameter**):
    
          aws cloudformation create-stack --region ap-southeast-2 --capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM --template-body file://template.yml  --stack-name introToJenkins --parameters ParameterKey=KeyName,ParameterValue=<key_name>
 5. Wait for the stack to complete provisioning resources
