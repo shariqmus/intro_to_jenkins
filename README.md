@@ -150,7 +150,7 @@ _(Optional: Confirm Jenkins created a Personal Access Token in GitHub)_
 7. Click 'Commit changes'
 8. Navigate to Jenkins homepage and confirm a build is started as soon as the commit was performed.
 9. Check the Console output under the Build in Jenkins by clicking build number (e.g. '#2') and the 'Console Output'
-10. Navigate to Beanstalk environment URL and confirm your changes were deployed:
+10. Navigate to Beanstalk environment URL and confirm your changes were deployed. You can find the EB environment URL using this command:
       
          aws cloudformation describe-stacks --region ap-southeast-2 --query "Stacks[*].Outputs[?OutputKey=='EBEnvironmentURL'].OutputValue" --output text
 
