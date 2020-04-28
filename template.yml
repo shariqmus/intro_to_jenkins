@@ -118,7 +118,7 @@ Resources:
             #!/bin/bash
             yum remove java-1.7.0-openjdk -y
             yum install java-1.8.0 -y
-            yum update –y
+            yum -y update
             wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
             rpm -import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key
             yum install git -y
@@ -198,7 +198,7 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
             #!/bin/bash
-            yum update –y
+            yum -y update
             yum install java-1.8.0-openjdk -y
             yum install git -y
             yum groupinstall "Development Tools" -y 
