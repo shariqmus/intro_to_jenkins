@@ -248,7 +248,7 @@ Resources:
       EnvironmentName: DevelopmentEnvironment
       ApplicationName: !Ref EBApplication
       Description: "AWS Elastic Beanstalk Environment running Python Sample Application"
-      SolutionStackName: "64bit Amazon Linux 2018.03 v2.9.7 running Python 3.6"
+      SolutionStackName: "64bit Amazon Linux 2018.03 v2.9.13 running Python 3.6"
       OptionSettings: 
         - 
           Namespace: "aws:autoscaling:launchconfiguration"
